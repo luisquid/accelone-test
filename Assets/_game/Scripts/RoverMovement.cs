@@ -11,7 +11,7 @@ public class RoverMovement : MonoBehaviour
     public float movementSpeed = 0.4f;
 
     private RoverInput roverInput;
-    private bool isMoving = false;
+    private bool executing = false;
     private bool startMoving = false;
     private int index;
 
@@ -25,9 +25,9 @@ public class RoverMovement : MonoBehaviour
     {
         if(startMoving)
         {
-            if(!isMoving && index < roverInput.commandsArray.Length)
+            if(!executing && index < roverInput.commandsArray.Length)
             {
-                isMoving = true;
+                executing = true;
                 SetState(roverInput.commandsArray[index]);
             }
             else if (index > roverInput.commandsArray.Length)
@@ -55,10 +55,10 @@ public class RoverMovement : MonoBehaviour
                 StartCoroutine(MovePosition(transform.position + (-transform.forward * movementAmount), movementSpeed));
                 break;
             case "l":
-                StartCoroutine(RotatePosition(Vector3.up * 90f, movementSpeed));
+                StartCoroutine(RotatePosition(transform.rotation.eulerAngles + (Vector3.down * 90f), movementSpeed));
                 break;
             case "r":
-                StartCoroutine(RotatePosition(Vector3.down * 90f, movementSpeed));
+                StartCoroutine(RotatePosition(transform.rotation.eulerAngles + (Vector3.up * 90f), movementSpeed));
                 break;
             default:
                 Debug.Log("COMMAND NOT AVAILABLE!");
@@ -92,18 +92,18 @@ public class RoverMovement : MonoBehaviour
             time += Time.deltaTime;
             yield return null;
         }
-        transform.position = targetRotation;
+        transform.rotation = Quaternion.Euler(targetRotation);
 
         StartCoroutine(WaitForCommand());
     }
 
     IEnumerator WaitForCommand()
     {
-        //We add some time between commands
+        //We add a delay between commands
         yield return new WaitForSeconds(timeBetweenCommands);
 
         index++;
-        isMoving = false;
+        executing = false;
     }
 
 }

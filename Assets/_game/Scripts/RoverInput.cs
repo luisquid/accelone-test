@@ -12,8 +12,10 @@ public class RoverInput : MonoBehaviour
     public void ReceiveSpawnInfo(int _x, int _y, string _dir)
     {
         transform.rotation = Quaternion.identity;
+        
         initialPos = new Vector3(_x, transform.position.y, _y);
         transform.position = initialPos;
+        
         switch (_dir)
         {
             case "N":
