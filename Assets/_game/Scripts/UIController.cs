@@ -24,6 +24,7 @@ public class UIController : MonoBehaviour
     #region Unity Functions
     private void Start()
     {
+        //We change the default hint text in input fields to show the camera view range as a hint to set the rover's initial position
         xInputField.GetComponentInChildren<TextMeshProUGUI>().text = "X Range [" + Mathf.Ceil(-CameraProperties.width) + "," + Mathf.Floor(CameraProperties.width) + "]";
         yInputField.GetComponentInChildren<TextMeshProUGUI>().text = "Y Range [" + Mathf.Ceil(-CameraProperties.height) + "," + Mathf.Floor(CameraProperties.height) + "]";
     }
@@ -47,7 +48,7 @@ public class UIController : MonoBehaviour
             //We validate the x and y value to set starting point
             if(xInRange && yInRange)
             {
-                playerInput.ReceiveSpawnInfo(int.Parse(xInputField.text), int.Parse(yInputField.text), directionInputField.text);
+                playerInput.ReceiveSpawnInfo(xPos, yPos, directionInputField.text);
                 playerInput.ReceiveCommands(commandsInputField.text);
             }
             else
@@ -59,14 +60,17 @@ public class UIController : MonoBehaviour
 
     public void OnStartButtonClicked()
     {
+        //Are there any commands available?
         if(playerInput.commandsArray.Length <= 0)
         {
             ShowErrorMessage("COMMANDS NOT AVAILABLE!");
         }
+        //Is the rover executing commands?
         else if(playerMovement.IsRunning())
         {
             ShowErrorMessage("COMMANDS IN PROGRESS!");
         }
+        //Start executing commands
         else
         {
             playerMovement.StartBehavior();
@@ -84,7 +88,8 @@ public class UIController : MonoBehaviour
         errorText.text = _errorLog;
         errorPanel.SetActive(true);
     }
-    
+
+    #region Input Fields Data Validation
     public void VerifyXRange(string _value)
     {
         if (string.IsNullOrEmpty(_value))
@@ -113,4 +118,6 @@ public class UIController : MonoBehaviour
         else
             yInRange = true;
     }
+
+    #endregion
 }

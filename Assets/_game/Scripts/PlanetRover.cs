@@ -2,31 +2,30 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-
-
-public class RoverMovement : MonoBehaviour
+public class PlanetRover : MonoBehaviour
 {
     public float timeBetweenCommands = 0.2f;
     public float movementAmount = 1f;
     public float movementSpeed = 0.4f;
+    public bool isRunning = false;
 
+    private PlanetGravity planetGravity;
     private RoverInput roverInput;
     private bool executing = false;
-    private bool isRunning = false;
     private int index;
 
     #region Unity Functions
     private void Start()
     {
+        planetGravity = FindObjectOfType<PlanetGravity>();
         roverInput = GetComponent<RoverInput>();
     }
 
     private void Update()
     {
-        if(isRunning)
+        if (isRunning)
         {
-            //If the command isn't executing anymore, but we still haven't gone over the commands array limit, we execute the next command
-            if(!executing && index < roverInput.commandsArray.Length)
+            if (!executing && index < roverInput.commandsArray.Length)
             {
                 executing = true;
                 SetState(roverInput.commandsArray[index]);
@@ -36,6 +35,17 @@ public class RoverMovement : MonoBehaviour
                 isRunning = false;
             }
         }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+            StartBehavior();
+    }
+
+    private void FixedUpdate()
+    {
+        if(planetGravity)
+        {
+            planetGravity.Attract(transform);
+        }
     }
     #endregion
 
@@ -44,16 +54,10 @@ public class RoverMovement : MonoBehaviour
         isRunning = true;
         index = 0;
     }
-
-    public bool IsRunning()
-    {
-        return isRunning;
-    }
-
-    //We set the state to each command
+   
     public void SetState(string _stateId)
     {
-        switch(_stateId)
+        switch (_stateId)
         {
             case "f":
                 StartCoroutine(MovePosition(transform.position + (transform.forward * movementAmount), movementSpeed));
@@ -62,14 +66,14 @@ public class RoverMovement : MonoBehaviour
                 StartCoroutine(MovePosition(transform.position + (-transform.forward * movementAmount), movementSpeed));
                 break;
             case "l":
-                StartCoroutine(RotatePosition(transform.rotation.eulerAngles + (Vector3.down * 90f), movementSpeed));
+                StartCoroutine(RotatePosition(transform.rotation.eulerAngles + (transform.up * -90f), movementSpeed));
                 break;
             case "r":
-                StartCoroutine(RotatePosition(transform.rotation.eulerAngles + (Vector3.up * 90f), movementSpeed));
+                StartCoroutine(RotatePosition(transform.rotation.eulerAngles + (transform.up * 90f), movementSpeed));
                 break;
             default:
                 Debug.Log("INVALID COMMAND!");
-                StartCoroutine(WaitForCommand()); 
+                StartCoroutine(WaitForCommand());
                 break;
         }
     }
@@ -84,13 +88,6 @@ public class RoverMovement : MonoBehaviour
             time += Time.deltaTime;
             yield return null;
         }
-
-        //If we go out of the camera view range we teleport to the other side of the screen
-        if (_targetPosition.x > CameraProperties.width || _targetPosition.x < -CameraProperties.width)
-            _targetPosition.x = _targetPosition.x * -1f;
-
-        if (_targetPosition.z > CameraProperties.height || _targetPosition.z < -CameraProperties.height)
-            _targetPosition.z = _targetPosition.z * -1f;
 
         transform.position = _targetPosition;
 
@@ -112,13 +109,12 @@ public class RoverMovement : MonoBehaviour
         StartCoroutine(WaitForCommand());
     }
 
-    //We add a delay between commands
     IEnumerator WaitForCommand()
     {
+        //We add a delay between commands
         yield return new WaitForSeconds(timeBetweenCommands);
 
         index++;
         executing = false;
     }
-
 }
