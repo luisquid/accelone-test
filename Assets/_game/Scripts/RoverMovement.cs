@@ -12,7 +12,7 @@ public class RoverMovement : MonoBehaviour
 
     private RoverInput roverInput;
     private bool executing = false;
-    private bool startMoving = false;
+    private bool isRunning = false;
     private int index;
 
     #region Unity Functions
@@ -23,16 +23,16 @@ public class RoverMovement : MonoBehaviour
 
     private void Update()
     {
-        if(startMoving)
+        if(isRunning)
         {
             if(!executing && index < roverInput.commandsArray.Length)
             {
                 executing = true;
                 SetState(roverInput.commandsArray[index]);
             }
-            else if (index > roverInput.commandsArray.Length)
+            else if (index >= roverInput.commandsArray.Length)
             {
-                startMoving = false;
+                isRunning = false;
             }
         }
     }
@@ -40,8 +40,13 @@ public class RoverMovement : MonoBehaviour
 
     public void StartBehavior()
     {
-        startMoving = true;
+        isRunning = true;
         index = 0;
+    }
+
+    public bool IsRunning()
+    {
+        return isRunning;
     }
 
     public void SetState(string _stateId)
@@ -61,38 +66,45 @@ public class RoverMovement : MonoBehaviour
                 StartCoroutine(RotatePosition(transform.rotation.eulerAngles + (Vector3.up * 90f), movementSpeed));
                 break;
             default:
-                Debug.Log("COMMAND NOT AVAILABLE!");
-                index++;
+                Debug.Log("INVALID COMMAND!");
+                StartCoroutine(WaitForCommand()); 
                 break;
         }
     }
 
-    IEnumerator MovePosition(Vector3 targetPosition, float duration)
+    IEnumerator MovePosition(Vector3 _targetPosition, float _duration)
     {
         float time = 0;
         Vector3 startPosition = transform.position;
-        while (time < duration)
+        while (time < _duration)
         {
-            transform.position = Vector3.Lerp(startPosition, targetPosition, time / duration);
+            transform.position = Vector3.Lerp(startPosition, _targetPosition, time / _duration);
             time += Time.deltaTime;
             yield return null;
         }
-        transform.position = targetPosition;
+
+        if (_targetPosition.x > CameraProperties.width || _targetPosition.x < -CameraProperties.width)
+            _targetPosition.x = _targetPosition.x * -1f;
+
+        if (_targetPosition.z > CameraProperties.height || _targetPosition.z < -CameraProperties.height)
+            _targetPosition.z = _targetPosition.z * -1f;
+
+        transform.position = _targetPosition;
 
         StartCoroutine(WaitForCommand());
     }
 
-    IEnumerator RotatePosition(Vector3 targetRotation, float duration)
+    IEnumerator RotatePosition(Vector3 _targetRotation, float _duration)
     {
         float time = 0;
         Vector3 startRotation = transform.rotation.eulerAngles;
-        while (time < duration)
+        while (time < _duration)
         {
-            transform.rotation = Quaternion.Euler(Vector3.Lerp(startRotation, targetRotation, time / duration));
+            transform.rotation = Quaternion.Euler(Vector3.Lerp(startRotation, _targetRotation, time / _duration));
             time += Time.deltaTime;
             yield return null;
         }
-        transform.rotation = Quaternion.Euler(targetRotation);
+        transform.rotation = Quaternion.Euler(_targetRotation);
 
         StartCoroutine(WaitForCommand());
     }

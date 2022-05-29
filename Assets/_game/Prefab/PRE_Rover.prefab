@@ -48,6 +48,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7bd28753aaf6a4244bdc0da0da9f2de3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  commandsArray: []
 --- !u!114 &5619012289698491510
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -60,6 +61,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 20c87539a1012924ca4a3a0c5c798876, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  timeBetweenCommands: 0.2
+  movementAmount: 1
+  movementSpeed: 0.4
 --- !u!1 &5619012289810446671
 GameObject:
   m_ObjectHideFlags: 0

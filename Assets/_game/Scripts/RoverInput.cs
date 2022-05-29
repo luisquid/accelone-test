@@ -27,11 +27,9 @@ public class RoverInput : MonoBehaviour
             case "E":
                 transform.rotation = Quaternion.Euler(new Vector3(0, 270, 0));
                 break;
-
             case "W":
                 transform.rotation = Quaternion.Euler(new Vector3(0, 90, 0));
                 break;
-
         }
     }
 
